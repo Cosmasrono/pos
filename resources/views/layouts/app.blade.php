@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Retail POS') - {{ config('app.name') }}</title>
+    <title>@yield('title', 'Wing POS') - {{ config('app.name') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
@@ -124,7 +124,7 @@
         <!-- Sidebar -->
         <nav class="sidebar" style="width: 250px; overflow-y: auto;">
             <div class="brand">
-                <i class="bi bi-shop"></i> Retail POS
+                <i class="bi bi-shop"></i> Wing POS
             </div>
             <ul class="nav flex-column">
                 <li class="nav-item">

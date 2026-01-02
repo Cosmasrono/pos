@@ -1,10 +1,39 @@
 @extends('layouts.app')
 
-@section('title', 'Point of Sale')
+@section('title', 'Wing POS')
 
 @section('page-title', 'Point of Sale (POS)')
 
 @section('content')
+<style>
+    body {
+        background: url('/images/pos-bg.png') no-repeat center center fixed;
+        background-size: cover;
+        position: relative;
+    }
+    
+    body::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(244, 247, 254, 0.4);
+        backdrop-filter: blur(2px);
+        z-index: -1;
+    }
+
+    .card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+    }
+
+    .card-header {
+        background: rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+</style>
 <div class="container-fluid">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <div class="row">
@@ -688,4 +717,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+@endsection
 @endpush
