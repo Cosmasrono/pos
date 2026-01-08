@@ -151,6 +151,32 @@
                         <i class="bi bi-box-seam"></i> Products
                     </a>
                 </li>
+                @if(auth()->user()->isSuperAdmin() || auth()->user()->isManager())
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('expenses.*') || request()->routeIs('expense-categories.*') ? 'active' : '' }}" 
+                       href="{{ route('expenses.index') }}">
+                        <i class="bi bi-cash-stack"></i> Finance
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('suppliers.*') || request()->routeIs('purchase-orders.*') ? 'active' : '' }}" 
+                       href="{{ route('purchase-orders.index') }}">
+                        <i class="bi bi-cart"></i> Purchases
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" 
+                       href="{{ route('reports.sales') }}">
+                        <i class="bi bi-graph-up"></i> Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" 
+                       href="{{ route('users.index') }}">
+                        <i class="bi bi-people"></i> Users
+                    </a>
+                </li>
+                @endif
                 <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
                 <li class="nav-item">
                     <form action="{{ route('logout') }}" method="POST" style="display: inline;">

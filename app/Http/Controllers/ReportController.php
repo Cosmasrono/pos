@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Sale;
+use App\Models\Expense;
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class ReportController extends Controller
+{
+    public function sales(Request $request)
+    {
+        $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->get('end_date', now()->format('Y-m-d'));
+
+        $sales = Sale::whereBetween('created_at', [$startDate, $endDate])
+            ->with(['cashier', 'items.product'])
+            ->get();
+
+        $summary = [
+            'total_sales' => $sales->sum('total_amount'),
+            'total_transactions' => $sales->count(),
+            'cash_sales' => $sales->sum('cash_paid'),
+            'mpesa_sales' => $sales->sum('mpesa_paid'),
+            'card_sales' => $sales->sum('card_paid'),
+            'average_transaction' => $sales->count() > 0 ? $sales->sum('total_amount') / $sales->count() : 0,
+        ];
+
+        // Top products
+        $topProducts = DB::table('sale_items')
+            ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->whereBetween('sales.created_at', [$startDate, $endDate])
+            ->select('products.name', DB::raw('SUM(sale_items.quantity) as total_quantity'), DB::raw('SUM(sale_items.line_total) as total_revenue'))
+            ->groupBy('products.id', 'products.name')
+            ->orderByDesc('total_revenue')
+            ->limit(10)
+            ->get();
+
+        return view('reports.sales', compact('summary', 'topProducts', 'startDate', 'endDate'));
+    }
+
+    public function profitLoss(Request $request)
+    {
+        $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->get('end_date', now()->format('Y-m-d'));
+
+        // Revenue from sales
+        $revenue = Sale::whereBetween('created_at', [$startDate, $endDate])
+            ->where('status', 'completed')
+            ->sum('total_amount');
+
+        // Cost of goods sold
+        $cogs = DB::table('sale_items')
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->whereBetween('sales.created_at', [$startDate, $endDate])
+            ->where('sales.status', 'completed')
+            ->sum(DB::raw('sale_items.quantity * products.cost_price'));
+
+        // Expenses
+        $expenses = Expense::whereBetween('expense_date', [$startDate, $endDate])
+            ->where('status', 'approved')
+            ->sum('amount');
+
+        $grossProfit = $revenue - $cogs;
+        $netProfit = $grossProfit - $expenses;
+
+        return view('reports.pnl', compact('revenue', 'cogs', 'grossProfit', 'expenses', 'netProfit', 'startDate', 'endDate'));
+    }
+}

@@ -4,6 +4,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\ShiftController;
+use App\Models\Role;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Authentication routes (Laravel provides these by default)
@@ -38,6 +40,24 @@ Route::middleware('auth')->group(function () {
     // POS Product Search Routes (JSON endpoints for AJAX)
     Route::get('pos/products', [SalesController::class, 'getProducts'])->name('pos.products');
     Route::get('pos/products/search', [SalesController::class, 'searchProduct'])->name('pos.search');
+
+    // Expenses & Finance
+    Route::resource('expenses', \App\Http\Controllers\ExpenseController::class);
+    Route::patch('expenses/{expense}/approve', [\App\Http\Controllers\ExpenseController::class, 'approve'])->name('expenses.approve');
+    Route::patch('expenses/{expense}/reject', [\App\Http\Controllers\ExpenseController::class, 'reject'])->name('expenses.reject');
+    Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class);
+
+    // Purchases
+    Route::resource('suppliers', \App\Http\Controllers\SupplierController::class);
+    Route::resource('purchase-orders', \App\Http\Controllers\PurchaseOrderController::class);
+    Route::patch('purchase-orders/{purchaseOrder}/receive', [\App\Http\Controllers\PurchaseOrderController::class, 'receive'])->name('purchase-orders.receive');
+
+    // Reports
+    Route::get('reports/sales', [\App\Http\Controllers\ReportController::class, 'sales'])->name('reports.sales');
+    Route::get('reports/pnl', [\App\Http\Controllers\ReportController::class, 'profitLoss'])->name('reports.pnl');
+
+    // Users
+    Route::resource('users', UserController::class);
 
     // Logout
     Route::post('logout', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'destroy'])->name('logout');

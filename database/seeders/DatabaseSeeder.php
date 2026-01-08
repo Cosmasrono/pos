@@ -15,11 +15,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Seed roles and permissions first
+        $this->call(RolePermissionSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Create default super admin
+        $admin = User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@gmail.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
         ]);
+
+        $admin->roles()->attach(\App\Models\Role::where('name', 'super_admin')->first());
+
+        // Create a test cashier
+        $cashier = User::factory()->create([
+            'name' => 'Test Cashier',
+            'email' => 'cashier@gmail.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+        ]);
+
+        $cashier->roles()->attach(\App\Models\Role::where('name', 'cashier')->first());
     }
 }

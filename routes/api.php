@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\MpesaController;
 use App\Http\Controllers\Api\CartController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:web'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     // Product Management
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductController::class, 'index']);
