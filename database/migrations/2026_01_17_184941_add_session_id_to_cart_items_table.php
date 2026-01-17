@@ -6,21 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::table('cart_items', function (Blueprint $table) {
-            if (!Schema::hasColumn('cart_items', 'session_id')) {
-                $table->string('session_id')->nullable()->after('user_id');
-                $table->index(['session_id', 'product_id']);
-            }
+            //
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::table('cart_items', function (Blueprint $table) {
-            $table->dropIndex(['session_id', 'product_id']);
-            $table->dropColumn('session_id');
+            //
         });
     }
 };
