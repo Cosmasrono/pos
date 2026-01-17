@@ -22,7 +22,7 @@
         </div>
     </div>
     
-    @if(!auth()->user()->isCashier())
+    @if(auth()->user()->isSuperAdmin() || auth()->user()->isManager())
     <div class="col-md-3">
         <div class="card stat-card shadow-sm border-0 border-start border-success border-4">
             <div class="card-body">
