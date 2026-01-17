@@ -8,11 +8,21 @@
     <div class="col-md-3">
         <div class="card stat-card shadow-sm border-0 border-start border-primary border-4">
             <div class="card-body">
-                <h6 class="card-title text-muted small mb-1">Today's Sales</h6>
-                <div class="stat-value h4 fw-bold mb-0">KES {{ number_format($todaySales, 2) }}</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="card-title text-muted small mb-1">Today's Sales</h6>
+                    <button class="btn btn-sm btn-link text-muted p-0" id="toggleSalesBtn" title="Hide/Unhide Sales">
+                        <i class="bi bi-eye-slash" id="salesEyeIcon"></i>
+                    </button>
+                </div>
+                <div class="stat-value h4 fw-bold mb-0" id="salesAmountContainer">
+                    <span id="salesValueMasked">KES *****</span>
+                    <span id="salesValueActual" style="display: none;">KES {{ number_format($todaySales, 2) }}</span>
+                </div>
             </div>
         </div>
     </div>
+    
+    @if(!auth()->user()->isCashier())
     <div class="col-md-3">
         <div class="card stat-card shadow-sm border-0 border-start border-success border-4">
             <div class="card-body">
@@ -39,7 +49,35 @@
             </div>
         </div>
     </div>
+    @endif
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('toggleSalesBtn');
+    const eyeIcon = document.getElementById('salesEyeIcon');
+    const maskedValue = document.getElementById('salesValueMasked');
+    const actualValue = document.getElementById('salesValueActual');
+    
+    // Default to hidden (masked)
+    let isHidden = true;
+    
+    toggleBtn.addEventListener('click', function() {
+        if (isHidden) {
+            maskedValue.style.display = 'none';
+            actualValue.style.display = 'inline';
+            eyeIcon.classList.remove('bi-eye-slash');
+            eyeIcon.classList.add('bi-eye');
+        } else {
+            maskedValue.style.display = 'inline';
+            actualValue.style.display = 'none';
+            eyeIcon.classList.remove('bi-eye');
+            eyeIcon.classList.add('bi-eye-slash');
+        }
+        isHidden = !isHidden;
+    });
+});
+</script>
 
 <div class="row">
     <div class="col-md-8">

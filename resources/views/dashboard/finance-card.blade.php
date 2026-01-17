@@ -1,4 +1,3 @@
-<!-- Finance Quick View Card - Add to Dashboard -->
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-gradient-purple text-white py-3">
         <h6 class="m-0"><i class="bi bi-graph-up"></i> Financial Summary</h6>
@@ -10,10 +9,17 @@
                 <div class="text-center mb-3">
                     <div style="font-size: 2rem; margin-bottom: 5px;">💵</div>
                     <small class="text-muted d-block">Today's Sales</small>
-                    <h5 class="mb-0">KES {{ $todaySales ?? '0.00' }}</h5>
+                    <div class="d-flex align-items-center justify-content-center">
+                        <h5 class="mb-0 sales-masked">KES *****</h5>
+                        <h5 class="mb-0 sales-actual" style="display: none;">KES {{ $todaySales ?? '0.00' }}</h5>
+                        <button class="btn btn-sm btn-link text-muted ms-2 p-0 toggleFinanceSales">
+                            <i class="bi bi-eye-slash financeEyeIcon"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
+            @if(!auth()->user()->isCashier())
             <!-- Expenses -->
             <div class="col-md-3">
                 <div class="text-center mb-3">
@@ -40,8 +46,10 @@
                     <h5 class="mb-0">{{ $pendingExpenses ?? 0 }}</h5>
                 </div>
             </div>
+            @endif
         </div>
 
+        @if(!auth()->user()->isCashier())
         <hr>
 
         <!-- Quick Actions -->
@@ -67,8 +75,34 @@
                 </a>
             </div>
         </div>
+        @endif
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtns = document.querySelectorAll('.toggleFinanceSales');
+    
+    toggleBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const container = this.closest('.text-center');
+            const masked = container.querySelector('.sales-masked');
+            const actual = container.querySelector('.sales-actual');
+            const icon = this.querySelector('.financeEyeIcon');
+            
+            if (masked.style.display === 'none') {
+                masked.style.display = 'block';
+                actual.style.display = 'none';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                masked.style.display = 'none';
+                actual.style.display = 'block';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        });
+    });
+});
+</script>
 
 <style>
     .bg-gradient-purple {
