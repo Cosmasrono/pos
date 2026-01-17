@@ -20,8 +20,7 @@ class ProductController extends Controller
 
     public function create(): View
     {
-        $categories = Category::all();
-        return view('products.create', ['categories' => $categories]);
+        return view('products.create');
     }
 
     public function store(Request $request): RedirectResponse
@@ -31,12 +30,21 @@ class ProductController extends Controller
             'sku' => 'required|unique:products|string|max:100',
             'barcode' => 'nullable|unique:products|string|max:100',
             'description' => 'nullable|string',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required|string|max:255', // Now accepts category name
             'cost_price' => 'nullable|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
             'quantity_in_stock' => 'nullable|integer|min:0',
             'reorder_level' => 'required|integer|min:0',
         ]);
+
+        // Find or create category by name
+        $category = Category::firstOrCreate(
+            ['name' => $validated['category_id']], // Search by name
+            ['name' => $validated['category_id']]  // Create with this name if not found
+        );
+
+        // Replace category name with actual category ID
+        $validated['category_id'] = $category->id;
 
         // Default cost_price to 0 if not provided
         if (!isset($validated['cost_price']) || is_null($validated['cost_price'])) {
@@ -60,8 +68,7 @@ class ProductController extends Controller
 
     public function edit(Product $product): View
     {
-        $categories = Category::all();
-        return view('products.edit', ['product' => $product, 'categories' => $categories]);
+        return view('products.edit', ['product' => $product]);
     }
 
     public function update(Request $request, Product $product): RedirectResponse
@@ -71,13 +78,22 @@ class ProductController extends Controller
             'sku' => 'required|unique:products,sku,' . $product->id . '|string|max:100',
             'barcode' => 'nullable|unique:products,barcode,' . $product->id . '|string|max:100',
             'description' => 'nullable|string',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required|string|max:255', // Now accepts category name
             'cost_price' => 'nullable|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
             'quantity_in_stock' => 'nullable|integer|min:0',
             'reorder_level' => 'required|integer|min:0',
             'is_active' => 'boolean',
         ]);
+
+        // Find or create category by name
+        $category = Category::firstOrCreate(
+            ['name' => $validated['category_id']], // Search by name
+            ['name' => $validated['category_id']]  // Create with this name if not found
+        );
+
+        // Replace category name with actual category ID
+        $validated['category_id'] = $category->id;
 
         // Default cost_price to 0 if not provided
         if (!isset($validated['cost_price']) || is_null($validated['cost_price'])) {
