@@ -17,10 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
-        // REMOVED: No need for throttle on internal POS API calls
-        // $middleware->api(append: [ ... ThrottleRequests ... ]);
-
-        // Web middleware modifications (if any)
+     
         $middleware->web(append: [
             // Add web middleware if needed
         ]);

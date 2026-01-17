@@ -9,9 +9,9 @@
         <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
             <h6 class="m-0 font-weight-bold text-primary">Expense List</h6>
             <div class="d-flex gap-2">
-                <a href="{{ route('expense-categories.index') }}" class="btn btn-outline-secondary btn-sm">
+                <!-- <a href="{{ route('expense-categories.index') }}" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-folder"></i> Categories
-                </a>
+                </a> -->
                 <a href="{{ route('expenses.create') }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-circle"></i> Record Expense
                 </a>
@@ -36,7 +36,7 @@
                         @forelse($expenses as $expense)
                             <tr>
                                 <td>{{ $expense->expense_date->format('M d, Y') }}</td>
-                                <td>{{ $expense->category->name }}</td>
+                                <td>{{ $expense->category_name ?? ($expense->category->name ?? 'N/A') }}</td>
                                 <td>{{ Str::limit($expense->description, 40) }}</td>
                                 <td>KES {{ number_format($expense->amount, 2) }}</td>
                                 <td><span class="badge bg-info">{{ ucfirst($expense->payment_method) }}</span></td>

@@ -10,7 +10,7 @@ class FinanceService
     public function recordExpense(array $data): Expense
     {
         return Expense::create([
-            'category_id' => $data['category_id'],
+            'category_name' => $data['category_name'],
             'amount' => $data['amount'],
             'description' => $data['description'],
             'expense_date' => $data['expense_date'] ?? now()->date(),

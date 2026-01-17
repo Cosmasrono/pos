@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\CartService;
 use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,7 +31,14 @@ class AuthenticatedSessionController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            // Capture guest session ID BEFORE regeneration
+            $guestSessionId = $request->session()->getId();
+            
             $request->session()->regenerate();
+
+            // Merge guest cart items into user's cart
+            app(CartService::class)->mergeGuestCart($guestSessionId, Auth::id());
+
             event(new Authenticated('web', Auth::user()));
             return redirect()->intended(route('dashboard', absolute: false));
         }

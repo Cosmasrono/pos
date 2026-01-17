@@ -80,10 +80,10 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="cost_price" class="form-label">Cost Price per Item (KES) *</label>
+                            <label for="cost_price" class="form-label">Cost Price per Item (KES)</label>
                             <input type="number" step="0.01" id="cost_price" name="cost_price" class="form-control @error('cost_price') is-invalid @enderror" 
-                                   value="{{ old('cost_price') }}" placeholder="0.00" required>
-                            <small class="text-muted">Cost for a single item</small>
+                                   value="{{ old('cost_price') }}" placeholder="0.00">
+                            <small class="text-muted">Cost for a single item (Optional)</small>
                             @error('cost_price')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -101,20 +101,26 @@
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="quantity_in_stock" class="form-label">Initial Stock Quantity</label>
                             <input type="number" id="quantity_in_stock" name="quantity_in_stock" class="form-control @error('quantity_in_stock') is-invalid @enderror" 
                                    value="{{ old('quantity_in_stock', 0) }}" min="0">
-                            <small class="text-muted">Number of items to add initially (Total Cost will auto-calculate)</small>
+                            <small class="text-muted">Number of items to add initially</small>
                             @error('quantity_in_stock')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">Total Cost</label>
+                        <div class="col-md-4">
+                            <label class="form-label">Total Cost Value</label>
                             <input type="text" id="total_cost_display" class="form-control" readonly disabled>
-                            <small class="text-muted">Auto-calculated: Cost Price × Quantity</small>
+                            <small class="text-muted">Cost × Quantity</small>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label text-primary fw-bold">Total Selling Value</label>
+                            <input type="text" id="total_selling_display" class="form-control border-primary" readonly disabled>
+                            <small class="text-muted text-primary">Selling × Quantity</small>
                         </div>
                     </div>
 
@@ -133,22 +139,30 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const costPriceInput = document.getElementById('cost_price');
+    const sellingPriceInput = document.getElementById('selling_price');
     const quantityInput = document.getElementById('quantity_in_stock');
     const totalCostDisplay = document.getElementById('total_cost_display');
+    const totalSellingDisplay = document.getElementById('total_selling_display');
 
-    function calculateTotalCost() {
+    function calculateTotals() {
         const costPrice = parseFloat(costPriceInput.value) || 0;
+        const sellingPrice = parseFloat(sellingPriceInput.value) || 0;
         const quantity = parseFloat(quantityInput.value) || 0;
+        
         const totalCost = (costPrice * quantity).toFixed(2);
+        const totalSelling = (sellingPrice * quantity).toFixed(2);
+        
         totalCostDisplay.value = 'KES ' + totalCost;
+        totalSellingDisplay.value = 'KES ' + totalSelling;
     }
 
     // Calculate on input change
-    costPriceInput.addEventListener('input', calculateTotalCost);
-    quantityInput.addEventListener('input', calculateTotalCost);
+    costPriceInput.addEventListener('input', calculateTotals);
+    sellingPriceInput.addEventListener('input', calculateTotals);
+    quantityInput.addEventListener('input', calculateTotals);
 
     // Initial calculation
-    calculateTotalCost();
+    calculateTotals();
 });
 </script>
 @endsection

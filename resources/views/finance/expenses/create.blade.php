@@ -18,15 +18,9 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Category</label>
-                                <select name="category_id" class="form-control @error('category_id') is-invalid @enderror" required>
-                                    <option value="">Select Category</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                            {{ $category->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('category_id')
+                                <input type="text" name="category_name" class="form-control @error('category_name') is-invalid @enderror" 
+                                       value="{{ old('category_name') }}" required placeholder="Enter category">
+                                @error('category_name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>

@@ -15,7 +15,20 @@ class PurchaseOrderController extends Controller
             ->latest()
             ->paginate(15);
         
-        return view('purchases.orders.index', compact('orders'));
+        // Summary data for restaurant manager
+        $pendingCount = PurchaseOrder::where('status', 'pending')->count();
+        
+        $receivedCount = PurchaseOrder::where('status', 'received')
+            ->whereYear('received_date', now()->year)
+            ->whereMonth('received_date', now()->month)
+            ->count();
+        
+        $totalSpending = PurchaseOrder::where('status', 'received')
+            ->whereYear('received_date', now()->year)
+            ->whereMonth('received_date', now()->month)
+            ->sum('total_cost');
+        
+        return view('purchases.orders.index-simple', compact('orders', 'pendingCount', 'receivedCount', 'totalSpending'));
     }
 
     public function create()
@@ -23,7 +36,7 @@ class PurchaseOrderController extends Controller
         $suppliers = Supplier::where('is_active', true)->get();
         $products = Product::where('is_active', true)->get();
         
-        return view('purchases.orders.create', compact('suppliers', 'products'));
+        return view('purchases.orders.create-simple', compact('suppliers', 'products'));
     }
 
     public function store(Request $request)

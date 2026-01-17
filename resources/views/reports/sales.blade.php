@@ -5,6 +5,20 @@
 
 @section('content')
 <div class="container-fluid px-4">
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('reports.sales') ? 'active' : '' }}" href="{{ route('reports.sales') }}">
+                <i class="bi bi-receipt"></i> Sales Report
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->routeIs('reports.pnl') ? 'active' : '' }}" href="{{ route('reports.pnl') }}">
+                <i class="bi bi-calculator"></i> Profit & Loss Statement
+            </a>
+        </li>
+    </ul>
+
     <div class="card mb-4">
         <div class="card-header bg-white py-3">
             <h6 class="m-0 font-weight-bold text-primary">Filter Report</h6>

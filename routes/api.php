@@ -9,16 +9,32 @@ use App\Http\Controllers\Api\MpesaController;
 use App\Http\Controllers\Api\CartController;
 use Illuminate\Support\Facades\Route;
 
+// Cart routes - accessible to both authenticated and guest users
+// Using auth:sanctum middleware which is session-aware due to EnsureFrontendRequestsAreStateful
 Route::middleware(['auth:sanctum'])->group(function () {
-    // Product Management
+    Route::prefix('cart')->group(function () {
+        Route::get('/', [CartController::class, 'index']);
+        Route::post('/', [CartController::class, 'store']);
+        Route::put('/{productId}', [CartController::class, 'update']);
+        Route::delete('/{productId}', [CartController::class, 'destroy']);
+        Route::delete('/', [CartController::class, 'clear']);
+    });
+});
+
+// Product routes - public read access
+Route::prefix('products')->group(function () {
+    Route::get('/', [ProductController::class, 'index']);
+    Route::get('/search/query', [ProductController::class, 'search']);
+    Route::get('/barcode/lookup', [ProductController::class, 'byBarcode']);
+    Route::get('/inventory/low-stock', [ProductController::class, 'lowStock']);
+    Route::get('/inventory/stock-value', [ProductController::class, 'stockValue']);
+    Route::get('/{product}', [ProductController::class, 'show']);
+});
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Product Management (Protected actions)
     Route::prefix('products')->group(function () {
-        Route::get('/', [ProductController::class, 'index']);
         Route::post('/', [ProductController::class, 'store']);
-        Route::get('/search/query', [ProductController::class, 'search']);
-        Route::get('/barcode/lookup', [ProductController::class, 'byBarcode']);
-        Route::get('/inventory/low-stock', [ProductController::class, 'lowStock']);
-        Route::get('/inventory/stock-value', [ProductController::class, 'stockValue']);
-        Route::get('/{product}', [ProductController::class, 'show']);
         Route::put('/{product}', [ProductController::class, 'update']);
     });
 
@@ -71,15 +87,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('mpesa')->group(function () {
         Route::post('/initiate', [MpesaController::class, 'initiate']);
         Route::get('/status/{checkoutRequestId}', [MpesaController::class, 'status']);
-    });
-
-    // Cart Management
-    Route::prefix('cart')->group(function () {
-        Route::get('/', [CartController::class, 'index']);
-        Route::post('/', [CartController::class, 'store']);
-        Route::put('/{productId}', [CartController::class, 'update']);
-        Route::delete('/{productId}', [CartController::class, 'destroy']);
-        Route::delete('/', [CartController::class, 'clear']);
     });
 });
 

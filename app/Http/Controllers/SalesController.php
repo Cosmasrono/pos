@@ -33,10 +33,6 @@ class SalesController extends Controller
             ->where('cashier_id', auth()->id())
             ->first();
 
-        if (!$activeShift) {
-            return view('sales.no-shift');
-        }
-
         $products = Product::where('is_active', true)
             ->with('category')
             ->get();
@@ -47,7 +43,7 @@ class SalesController extends Controller
             'products' => $products,
             'customers' => $customers,
             'shift' => $activeShift,
-            'hasActiveShift' => true
+            'hasActiveShift' => (bool)$activeShift
         ]);
     }
 

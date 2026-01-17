@@ -32,11 +32,16 @@ class ProductController extends Controller
             'barcode' => 'nullable|unique:products|string|max:100',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
-            'cost_price' => 'required|numeric|min:0',
+            'cost_price' => 'nullable|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
             'quantity_in_stock' => 'nullable|integer|min:0',
             'reorder_level' => 'required|integer|min:0',
         ]);
+
+        // Default cost_price to 0 if not provided
+        if (!isset($validated['cost_price']) || is_null($validated['cost_price'])) {
+            $validated['cost_price'] = 0;
+        }
 
         // Auto-calculate total cost: cost_price × quantity_in_stock
         $quantity = $validated['quantity_in_stock'] ?? 0;
@@ -67,12 +72,17 @@ class ProductController extends Controller
             'barcode' => 'nullable|unique:products,barcode,' . $product->id . '|string|max:100',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
-            'cost_price' => 'required|numeric|min:0',
+            'cost_price' => 'nullable|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
             'quantity_in_stock' => 'nullable|integer|min:0',
             'reorder_level' => 'required|integer|min:0',
             'is_active' => 'boolean',
         ]);
+
+        // Default cost_price to 0 if not provided
+        if (!isset($validated['cost_price']) || is_null($validated['cost_price'])) {
+            $validated['cost_price'] = 0;
+        }
 
         // Auto-calculate total cost: cost_price × quantity_in_stock
         $quantity = $validated['quantity_in_stock'] ?? $product->quantity_in_stock;

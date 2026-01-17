@@ -6,34 +6,36 @@
 @section('content')
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card stat-card">
+        <div class="card stat-card shadow-sm border-0 border-start border-primary border-4">
             <div class="card-body">
-                <h6 class="card-title">Today's Sales</h6>
-                <div class="stat-value">KES {{ number_format($todaySales, 2) }}</div>
+                <h6 class="card-title text-muted small mb-1">Today's Sales</h6>
+                <div class="stat-value h4 fw-bold mb-0">KES {{ number_format($todaySales, 2) }}</div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card stat-card" style="border-left-color: #28a745;">
+        <div class="card stat-card shadow-sm border-0 border-start border-success border-4">
             <div class="card-body">
-                <h6 class="card-title">Total Products</h6>
-                <div class="stat-value">{{ $totalProducts }}</div>
+                <h6 class="card-title text-muted small mb-1">MTD Profit <i class="bi bi-info-circle small" title="Monthly Revenue - (COGS + Expenses)"></i></h6>
+                <div class="stat-value h4 fw-bold mb-0 {{ $mtdProfit >= 0 ? 'text-success' : 'text-danger' }}">
+                    KES {{ number_format($mtdProfit, 2) }}
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card stat-card" style="border-left-color: #ffc107;">
+        <div class="card stat-card shadow-sm border-0 border-start border-info border-4">
             <div class="card-body">
-                <h6 class="card-title">Low Stock</h6>
-                <div class="stat-value">{{ $lowStockProducts }}</div>
+                <h6 class="card-title text-muted small mb-1">MTD Revenue</h6>
+                <div class="stat-value h4 fw-bold mb-0">KES {{ number_format($mtdRevenue, 2) }}</div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card stat-card" style="border-left-color: #17a2b8;">
+        <div class="card stat-card shadow-sm border-0 border-start border-warning border-4">
             <div class="card-body">
-                <h6 class="card-title">Active Shift</h6>
-                <div class="stat-value">{{ $activeShift ? 'Yes' : 'No' }}</div>
+                <h6 class="card-title text-muted small mb-1">Low Stock Items</h6>
+                <div class="stat-value h4 fw-bold mb-0 text-warning">{{ $lowStockProducts }}</div>
             </div>
         </div>
     </div>

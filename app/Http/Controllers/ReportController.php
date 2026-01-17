@@ -65,9 +65,18 @@ class ReportController extends Controller
             ->where('status', 'approved')
             ->sum('amount');
 
+        // Expense breakdown
+        $expenseBreakdown = DB::table('expenses')
+            ->whereBetween('expense_date', [$startDate, $endDate])
+            ->where('status', 'approved')
+            ->select('category_name', DB::raw('SUM(amount) as total_amount'))
+            ->groupBy('category_name')
+            ->orderByDesc('total_amount')
+            ->get();
+
         $grossProfit = $revenue - $cogs;
         $netProfit = $grossProfit - $expenses;
 
-        return view('reports.pnl', compact('revenue', 'cogs', 'grossProfit', 'expenses', 'netProfit', 'startDate', 'endDate'));
+        return view('reports.pnl', compact('revenue', 'cogs', 'grossProfit', 'expenses', 'netProfit', 'expenseBreakdown', 'startDate', 'endDate'));
     }
 }

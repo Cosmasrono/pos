@@ -109,10 +109,6 @@
                                 <span>Discount</span>
                                 <input type="number" name="discount" id="discount" class="form-control form-control-sm text-end" value="0" min="0" step="0.01" style="width: 100px;">
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Tax (16%)</span>
-                                <strong id="tax">KES 0.00</strong>
-                            </div>
                             <hr>
                             <div class="d-flex justify-content-between mb-3">
                                 <h5>Total Amount</h5>
@@ -235,7 +231,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let cart = [];
-    const TAX_RATE = 0.16;
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     // API Headers Helper
@@ -498,17 +493,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateTotals() {
         const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         const discount = parseFloat(document.getElementById('discount').value) || 0;
-        const taxableAmount = subtotal - discount;
-        const tax = taxableAmount * TAX_RATE;
-        const total = taxableAmount + tax;
+        const total = subtotal - discount;
         
         document.getElementById('subtotal').textContent = `KES ${subtotal.toFixed(2)}`;
-        document.getElementById('tax').textContent = `KES ${tax.toFixed(2)}`;
         document.getElementById('totalAmount').textContent = `KES ${total.toFixed(2)}`;
         
         // Update hidden inputs
         document.getElementById('subtotalInput').value = subtotal.toFixed(2);
-        document.getElementById('taxInput').value = tax.toFixed(2);
+        document.getElementById('taxInput').value = '0';
         document.getElementById('totalInput').value = total.toFixed(2);
         document.getElementById('cartData').value = JSON.stringify(cart);
         

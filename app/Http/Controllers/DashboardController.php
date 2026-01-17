@@ -35,12 +35,35 @@ class DashboardController extends Controller
             ->with(['cashier', 'customer'])
             ->get();
 
+        // Month-to-date Profit & Loss details
+        $startOfMonth = now()->startOfMonth();
+        $endOfMonth = now()->endOfMonth();
+
+        $mtdRevenue = Sale::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->where('status', 'completed')
+            ->sum('total_amount');
+
+        $mtdCogs = \DB::table('sale_items')
+            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
+            ->join('products', 'sale_items.product_id', '=', 'products.id')
+            ->whereBetween('sales.created_at', [$startOfMonth, $endOfMonth])
+            ->where('sales.status', 'completed')
+            ->sum(\DB::raw('sale_items.quantity * products.cost_price'));
+
+        $mtdExpenses = \App\Models\Expense::whereBetween('expense_date', [$startOfMonth, $endOfMonth])
+            ->where('status', 'approved')
+            ->sum('amount');
+
+        $mtdProfit = ($mtdRevenue - $mtdCogs) - $mtdExpenses;
+
         return view('dashboard.index', [
             'todaySales' => $todaySales,
             'totalProducts' => $totalProducts,
             'lowStockProducts' => $lowStockProducts,
             'activeShift' => $activeShift,
             'recentSales' => $recentSales,
+            'mtdProfit' => $mtdProfit,
+            'mtdRevenue' => $mtdRevenue,
         ]);
     }
 }

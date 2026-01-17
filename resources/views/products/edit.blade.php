@@ -62,10 +62,11 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="cost_price" class="form-label">Cost Price (KES) <span class="text-danger">*</span></label>
+                            <label for="cost_price" class="form-label">Cost Price (KES)</label>
                             <input type="number" step="0.01" id="cost_price" name="cost_price" 
                                    class="form-control @error('cost_price') is-invalid @enderror" 
-                                   value="{{ old('cost_price', $product->cost_price) }}" required>
+                                   value="{{ old('cost_price', $product->cost_price) }}">
+                            <small class="text-muted">Cost for a single item (Optional)</small>
                             @error('cost_price')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -82,13 +83,26 @@
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="stock" class="form-label">Current Stock</label>
-                            <input type="number" id="stock" name="stock" class="form-control" 
-                                   value="{{ old('stock', $product->stock) }}" disabled>
-                            <small class="text-muted">Cannot be edited here. Use "Add Stock" from product details page.</small>
+                        <div class="col-md-4">
+                            <label for="quantity_in_stock" class="form-label">Current Stock</label>
+                            <input type="number" id="quantity_in_stock" class="form-control" 
+                                   value="{{ $product->quantity_in_stock }}" disabled>
+                            <small class="text-muted">Added: {{ $product->quantity_in_stock }} units</small>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label class="form-label">Total Cost Value</label>
+                            <input type="text" id="total_cost_display" class="form-control" readonly disabled>
+                            <small class="text-muted">Cost × Quantity</small>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-primary fw-bold">Total Selling Value</label>
+                            <input type="text" id="total_selling_display" class="form-control border-primary" readonly disabled>
+                            <small class="text-muted text-primary">Selling × Quantity</small>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
                             <label for="reorder_level" class="form-label">Reorder Level</label>
                             <input type="number" id="reorder_level" name="reorder_level" 
                                    class="form-control @error('reorder_level') is-invalid @enderror" 
@@ -131,4 +145,33 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const costPriceInput = document.getElementById('cost_price');
+    const sellingPriceInput = document.getElementById('selling_price');
+    const quantityInput = document.getElementById('quantity_in_stock');
+    const totalCostDisplay = document.getElementById('total_cost_display');
+    const totalSellingDisplay = document.getElementById('total_selling_display');
+
+    function calculateTotals() {
+        const costPrice = parseFloat(costPriceInput.value) || 0;
+        const sellingPrice = parseFloat(sellingPriceInput.value) || 0;
+        const quantity = parseFloat(quantityInput.value) || 0;
+        
+        const totalCost = (costPrice * quantity).toFixed(2);
+        const totalSelling = (sellingPrice * quantity).toFixed(2);
+        
+        totalCostDisplay.value = 'KES ' + totalCost;
+        totalSellingDisplay.value = 'KES ' + totalSelling;
+    }
+
+    // Calculate on input change
+    costPriceInput.addEventListener('input', calculateTotals);
+    sellingPriceInput.addEventListener('input', calculateTotals);
+    // quantityInput is disabled on edit, but we still trigger initial calculation
+    
+    // Initial calculation
+    calculateTotals();
+});
+</script>
 @endsection
