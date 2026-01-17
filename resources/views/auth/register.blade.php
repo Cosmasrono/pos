@@ -145,70 +145,106 @@
             </div>
             
             <div class="card-body">
-                @if ($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <div class="d-flex">
-                            <i class="bi bi-exclamation-circle-fill me-2"></i>
-                            <ul class="mb-0 list-unstyled">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+                @if ($registrationDisabled ?? false)
+                    <div class="text-center py-4">
+                        <div class="mb-4">
+                            <i class="bi bi-shield-lock text-warning" style="font-size: 4rem;"></i>
                         </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <h4 class="fw-bold text-dark">Registration Closed</h4>
+                        <p class="text-muted mb-4 px-3">
+                            The maximum number of **Super Admin** accounts (2) has been reached. 
+                            New account registration is currently disabled for security.
+                        </p>
+                        <a href="{{ route('login') }}" class="btn btn-primary btn-register px-5">
+                            Back to Login <i class="bi bi-box-arrow-in-right ms-2"></i>
+                        </a>
                     </div>
-                @endif
+                @else
+                    @if (session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <div class="d-flex">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <div>{{ session('success') }}</div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
 
-                <form action="{{ route('register') }}" method="POST">
-                    @csrf
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <div class="d-flex">
+                                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                                <ul class="mb-0 list-unstyled">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
 
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Full Name</label>
-                        <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror"
-                               placeholder="e.g. John Doe" value="{{ old('name') }}" required autofocus>
-                        @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                    <form action="{{ route('register') }}" method="POST">
+                        @csrf
 
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email Address</label>
-                        <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                               placeholder="john@example.com" value="{{ old('email') }}" required>
-                        @error('email')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" id="password" name="password" class="form-control @error('password') is-invalid @enderror"
-                                   placeholder="••••••••" required>
-                            @error('password')
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror"
+                                   placeholder="e.g. John Doe" value="{{ old('name') }}" required autofocus>
+                            @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="password_confirmation" class="form-label">Confirm Password</label>
-                            <input type="password" id="password_confirmation" name="password_confirmation" 
-                                   class="form-control @error('password_confirmation') is-invalid @enderror" 
-                                   placeholder="••••••••" required>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror"
+                                   placeholder="john@example.com" value="{{ old('email') }}" required>
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" id="password" name="password" class="form-control @error('password') is-invalid @enderror"
+                                       placeholder="••••••••" required>
+                                @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="password_confirmation" class="form-label">Confirm Password</label>
+                                <input type="password" id="password_confirmation" name="password_confirmation" 
+                                       class="form-control @error('password_confirmation') is-invalid @enderror" 
+                                       placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Account Role</label>
+                            <select id="role" name="role" class="form-control @error('role') is-invalid @enderror" required>
+                                <option value="super_admin" selected>Super Admin</option>
+                            </select>
+                            @error('role')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-register w-100 mt-2">
+                            Create Account <i class="bi bi-person-plus-fill ms-2"></i>
+                        </button>
+                    </form>
+
+                    <div class="mt-5 text-center">
+                        <p class="text-muted small mb-0">
+                            Already part of the team? 
+                            <a href="{{ route('login') }}" class="login-link">Sign in here</a>
+                        </p>
                     </div>
-
-                    <button type="submit" class="btn btn-primary btn-register w-100 mt-2">
-                        Create Account <i class="bi bi-person-plus-fill ms-2"></i>
-                    </button>
-                </form>
-
-                <div class="mt-5 text-center">
-                    <p class="text-muted small mb-0">
-                        Already part of the team? 
-                        <a href="{{ route('login') }}" class="login-link">Sign in here</a>
-                    </p>
-                </div>
+                @endif
             </div>
         </div>
 

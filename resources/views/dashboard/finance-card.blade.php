@@ -19,7 +19,7 @@
                 </div>
             </div>
 
-            @if(auth()->user()->isSuperAdmin() || auth()->user()->isManager())
+            @if(auth()->user()->isSuperAdmin())
             <!-- Expenses -->
             <div class="col-md-3">
                 <div class="text-center mb-3">
@@ -49,7 +49,7 @@
             @endif
         </div>
 
-        @if(auth()->user()->isSuperAdmin() || auth()->user()->isManager())
+        @if(auth()->user()->isSuperAdmin())
         <hr>
 
         <!-- Quick Actions -->

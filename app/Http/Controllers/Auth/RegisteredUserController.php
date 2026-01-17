@@ -19,7 +19,13 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        $superAdminCount = User::whereHas('roles', function($q) {
+            $q->where('name', 'super_admin');
+        })->count();
+
+        return view('auth.register', [
+            'registrationDisabled' => $superAdminCount >= 2
+        ]);
     }
 
     /**
@@ -29,10 +35,21 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $superAdminCount = User::whereHas('roles', function($q) {
+            $q->where('name', 'super_admin');
+        })->count();
+
+        if ($superAdminCount >= 2) {
+            return redirect()->route('login')->withErrors([
+                'email' => 'Registration is currently disabled because the maximum number of Super Admin accounts has been reached.'
+            ]);
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['required', 'string', 'exists:roles,name'],
         ]);
 
         $user = User::create([
@@ -41,10 +58,14 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        // Assign role
+        $role = \App\Models\Role::where('name', $request->role)->first();
+        if ($role) {
+            $user->roles()->attach($role->id);
+        }
+
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('login')->with('success', 'Registration successful! Please sign in with your new account.');
     }
 }

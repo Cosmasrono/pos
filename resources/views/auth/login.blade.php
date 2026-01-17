@@ -160,6 +160,16 @@
             </div>
             
             <div class="card-body">
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <div class="d-flex">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <div>{{ session('success') }}</div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+
                 @if ($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <div class="d-flex">
@@ -176,6 +186,13 @@
 
                 <form action="{{ route('login') }}" method="POST">
                     @csrf
+
+                    <div class="mb-4">
+                        <label for="login_role" class="form-label">Login As</label>
+                        <select id="login_role" name="login_role" class="form-control">
+                            <option value="super_admin" selected>Super Admin</option>
+                        </select>
+                    </div>
 
                     <div class="mb-4">
                         <label for="email" class="form-label">Email Address</label>
