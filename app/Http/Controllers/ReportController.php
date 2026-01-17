@@ -7,15 +7,20 @@ use App\Models\Expense;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
     public function sales(Request $request)
     {
-        $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
-        $endDate = $request->get('end_date', now()->format('Y-m-d'));
+        $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->get('end_date', Carbon::now()->format('Y-m-d'));
 
-        $sales = Sale::whereBetween('created_at', [$startDate, $endDate])
+        // Format for query to include full last day
+        $start = Carbon::parse($startDate)->startOfDay();
+        $end = Carbon::parse($endDate)->endOfDay();
+
+        $sales = Sale::whereBetween('created_at', [$start, $end])
             ->with(['cashier', 'items.product'])
             ->get();
 
@@ -28,11 +33,10 @@ class ReportController extends Controller
             'average_transaction' => $sales->count() > 0 ? $sales->sum('total_amount') / $sales->count() : 0,
         ];
 
-        // Top products
         $topProducts = DB::table('sale_items')
             ->join('products', 'sale_items.product_id', '=', 'products.id')
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
-            ->whereBetween('sales.created_at', [$startDate, $endDate])
+            ->whereBetween('sales.created_at', [$start, $end])
             ->select('products.name', DB::raw('SUM(sale_items.quantity) as total_quantity'), DB::raw('SUM(sale_items.line_total) as total_revenue'))
             ->groupBy('products.id', 'products.name')
             ->orderByDesc('total_revenue')
@@ -44,11 +48,14 @@ class ReportController extends Controller
 
     public function profitLoss(Request $request)
     {
-        $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
-        $endDate = $request->get('end_date', now()->format('Y-m-d'));
+        $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->get('end_date', Carbon::now()->format('Y-m-d'));
+
+        $start = Carbon::parse($startDate)->startOfDay();
+        $end = Carbon::parse($endDate)->endOfDay();
 
         // Revenue from sales
-        $revenue = Sale::whereBetween('created_at', [$startDate, $endDate])
+        $revenue = Sale::whereBetween('created_at', [$start, $end])
             ->where('status', 'completed')
             ->sum('total_amount');
 
@@ -56,11 +63,12 @@ class ReportController extends Controller
         $cogs = DB::table('sale_items')
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
             ->join('products', 'sale_items.product_id', '=', 'products.id')
-            ->whereBetween('sales.created_at', [$startDate, $endDate])
+            ->whereBetween('sales.created_at', [$start, $end])
             ->where('sales.status', 'completed')
             ->sum(DB::raw('sale_items.quantity * products.cost_price'));
 
-        // Expenses
+        // Expenses - Expenses use expense_date (often just format Y-m-d)
+        // If expense_date is a date column, we can compare directly
         $expenses = Expense::whereBetween('expense_date', [$startDate, $endDate])
             ->where('status', 'approved')
             ->sum('amount');
