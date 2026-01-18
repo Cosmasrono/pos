@@ -42,7 +42,8 @@ class PurchaseOrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'supplier_id' => ['required', 'exists:suppliers,id'],
+            'supplier_id' => ['nullable', 'exists:suppliers,id'],
+            'supplier_name' => ['required', 'string', 'max:255'],
             'order_date' => ['required', 'date'],
             'expected_delivery_date' => ['nullable', 'date', 'after_or_equal:order_date'],
             'notes' => ['nullable', 'string'],
@@ -58,6 +59,7 @@ class PurchaseOrderController extends Controller
         $order = PurchaseOrder::create([
             'po_number' => $poNumber,
             'supplier_id' => $request->supplier_id,
+            'supplier_name' => $request->supplier_name,
             'order_date' => $request->order_date,
             'expected_delivery_date' => $request->expected_delivery_date,
             'notes' => $request->notes,

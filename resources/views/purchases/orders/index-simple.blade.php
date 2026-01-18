@@ -88,7 +88,7 @@
                                         <span class="badge bg-primary">{{ $order->po_number }}</span>
                                     </td>
                                     <td>
-                                        <strong>{{ $order->supplier->name ?? 'N/A' }}</strong>
+                                        <strong>{{ $order->supplier_name }}</strong>
                                     </td>
                                     <td>
                                         <span class="badge bg-light text-dark">{{ $order->items->count() }} items</span>

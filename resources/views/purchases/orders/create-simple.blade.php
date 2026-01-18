@@ -18,16 +18,24 @@
                         <!-- Step 1: Select Supplier -->
                         <div class="mb-4">
                             <label class="form-label fw-bold">🏪 Select Supplier</label>
-                            <select name="supplier_id" class="form-select form-select-lg @error('supplier_id') is-invalid @enderror" 
-                                    id="supplierSelect" required onchange="updateSupplierInfo()">
-                                <option value="">-- Choose Supplier --</option>
+                            <input type="text" 
+                                   name="supplier_name"
+                                   class="form-control form-control-lg @error('supplier_name') is-invalid @enderror" 
+                                   id="supplierSearch" 
+                                   list="supplierList" 
+                                   placeholder="Type to search or enter new supplier..."
+                                   value="{{ old('supplier_name') }}"
+                                   autocomplete="off"
+                                   required>
+                            <input type="hidden" name="supplier_id" id="supplier_id" value="{{ old('supplier_id') }}">
+                            
+                            <datalist id="supplierList">
                                 @foreach($suppliers as $supplier)
-                                    <option value="{{ $supplier->id }}" {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>
-                                        {{ $supplier->name }}
-                                    </option>
+                                    <option data-id="{{ $supplier->id }}" value="{{ $supplier->name }}">
                                 @endforeach
-                            </select>
-                            @error('supplier_id')
+                            </datalist>
+                            
+                            @error('supplier_name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -197,20 +205,43 @@
 let itemIndex = 1;
 const products = @json($products);
 
-// Supplier Info
-document.getElementById('supplierSelect').addEventListener('change', updateSupplierInfo);
+// Supplier Selection Logic
+const supplierSearch = document.getElementById('supplierSearch');
+const supplierList = document.getElementById('supplierList');
+const supplierIdInput = document.getElementById('supplier_id');
+
+supplierSearch.addEventListener('input', function() {
+    const value = this.value;
+    let foundId = '';
+    
+    // Check if the typed value matches any option in the datalist
+    const options = supplierList.options;
+    for (let i = 0; i < options.length; i++) {
+        if (options[i].value === value) {
+            foundId = options[i].getAttribute('data-id');
+            break;
+        }
+    }
+    
+    supplierIdInput.value = foundId;
+    updateSupplierInfo();
+});
 
 function updateSupplierInfo() {
-    const select = document.getElementById('supplierSelect');
     const info = document.getElementById('supplierInfo');
+    const details = document.getElementById('supplierDetails');
     
-    if (select.value) {
-        // Could fetch supplier details via AJAX here
+    if (supplierIdInput.value) {
         info.classList.remove('d-none');
-        document.getElementById('supplierDetails').textContent = 'Supplier selected. Ready to add items.';
+        details.textContent = 'Supplier "' + supplierSearch.value + '" selected. Ready to add items.';
     } else {
         info.classList.add('d-none');
     }
+}
+
+// Initialize info if pre-filled
+if (supplierIdInput.value) {
+    updateSupplierInfo();
 }
 
 // Add Item Row

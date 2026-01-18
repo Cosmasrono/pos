@@ -35,7 +35,7 @@
                         @forelse($orders as $order)
                             <tr>
                                 <td>{{ $order->po_number }}</td>
-                                <td>{{ $order->supplier->name }}</td>
+                                <td>{{ $order->supplier_name }}</td>
                                 <td>{{ $order->order_date->format('M d, Y') }}</td>
                                 <td>KES {{ number_format($order->total_cost, 2) }}</td>
                                 <td>
