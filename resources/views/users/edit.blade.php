@@ -74,20 +74,20 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Assign Roles</label>
+                            <label class="form-label">Assign Role</label>
                             <div class="d-flex flex-wrap gap-3">
                                 @foreach($roles as $role)
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="roles[]" 
+                                        <input class="form-check-input" type="radio" name="role_id" 
                                                value="{{ $role->id }}" id="role_{{ $role->id }}"
-                                               {{ $user->roles->contains($role->id) ? 'checked' : '' }}>
+                                               {{ old('role_id', $user->roles->first()?->id) == $role->id ? 'checked' : '' }} required>
                                         <label class="form-check-label" for="role_{{ $role->id }}">
                                             {{ $role->display_name }}
                                         </label>
                                     </div>
                                 @endforeach
                             </div>
-                            @error('roles')
+                            @error('role_id')
                                 <div class="text-danger small">{{ $message }}</div>
                             @enderror
                         </div>

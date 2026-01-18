@@ -38,7 +38,7 @@ class UserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'phone' => ['nullable', 'string', 'max:15'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'roles' => ['required', 'array'],
+            'role_id' => ['required', 'exists:roles,id'],
         ]);
 
         $user = User::create([
@@ -49,7 +49,7 @@ class UserController extends Controller
             'is_active' => true,
         ]);
 
-        $user->roles()->sync($request->roles);
+        $user->roles()->sync([$request->role_id]);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
@@ -73,7 +73,7 @@ class UserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'phone' => ['nullable', 'string', 'max:15'],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
-            'roles' => ['required', 'array'],
+            'role_id' => ['required', 'exists:roles,id'],
         ]);
 
         $userData = [
@@ -88,7 +88,7 @@ class UserController extends Controller
         }
 
         $user->update($userData);
-        $user->roles()->sync($request->roles);
+        $user->roles()->sync([$request->role_id]);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
