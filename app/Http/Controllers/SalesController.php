@@ -20,7 +20,8 @@ class SalesController extends Controller
 
     public function index(): View
     {
-        $sales = Sale::with(['cashier', 'customer'])
+        $sales = Sale::forCurrentUser()
+            ->with(['cashier', 'customer'])
             ->latest()
             ->paginate(20);
 
@@ -38,10 +39,12 @@ class SalesController extends Controller
             ->get();
 
         $customers = Customer::all();
+        $promotions = \App\Models\Promotion::active()->get();
 
         return view('sales.pos', [
             'products' => $products,
             'customers' => $customers,
+            'promotions' => $promotions,
             'shift' => $activeShift,
             'hasActiveShift' => (bool)$activeShift
         ]);
@@ -90,6 +93,7 @@ class SalesController extends Controller
             'payment_method' => 'required|in:cash,mpesa,card,credit',
             'mpesa_phone' => 'nullable|string',
             'discount' => 'nullable|numeric|min:0',
+            'promotion_id' => 'nullable|exists:promotions,id',
             'tax_amount' => 'required|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
             'amount_tendered' => 'nullable|numeric|min:0',
@@ -127,6 +131,7 @@ class SalesController extends Controller
                 'customer_id' => $validated['customer_id'] ?? null,
                 'status' => 'completed',
                 'subtotal' => $subtotal,
+                'promotion_id' => $validated['promotion_id'] ?? null,
                 'tax_amount' => (float)$validated['tax_amount'],
                 'discount_amount' => (float)($validated['discount'] ?? 0),
                 'total_amount' => (float)$validated['total_amount'],
@@ -155,6 +160,11 @@ class SalesController extends Controller
 
     public function show(Sale $sale): View
     {
+        // Ensure user can only view their own sale if they are a cashier
+        if (auth()->user()->isCashier() && !auth()->user()->isSuperAdmin() && !auth()->user()->isManager() && $sale->cashier_id != auth()->id()) {
+            abort(404);
+        }
+
         return view('sales.show', [
             'sale' => $sale->load(['items.product', 'cashier', 'customer']),
         ]);
@@ -162,6 +172,11 @@ class SalesController extends Controller
 
     public function receipt(Sale $sale)
     {
+        // Ensure user can only view their own sale if they are a cashier
+        if (auth()->user()->isCashier() && !auth()->user()->isSuperAdmin() && !auth()->user()->isManager() && $sale->cashier_id != auth()->id()) {
+            abort(404);
+        }
+
         return view('sales.receipt', [
             'sale' => $sale->load(['items.product', 'cashier', 'customer']),
         ]);

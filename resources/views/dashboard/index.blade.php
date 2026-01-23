@@ -4,6 +4,34 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
+@if(auth()->user()->isOwner())
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm {{ $subscriptionStatus === 'active' ? 'bg-primary-subtle' : 'bg-danger-subtle' }}">
+            <div class="card-body py-2 px-3 d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                <div class="small fw-bold text-center text-sm-start mb-2 mb-sm-0">
+                    <i class="bi {{ $subscriptionStatus === 'active' ? 'bi-calendar-check' : 'bi-calendar-x' }} me-2 text-primary"></i>
+                    System Subscription: 
+                    <span class="{{ $subscriptionStatus === 'active' ? 'text-primary' : 'text-danger' }} text-uppercase">
+                        {{ $subscriptionStatus }}
+                    </span>
+                    @if($subscriptionExpiresAt)
+                        <span class="text-muted d-block d-sm-inline ms-sm-2">/ Expires: {{ $subscriptionExpiresAt->format('M d, Y') }} ({{ $subscriptionExpiresAt->diffForHumans() }})</span>
+                    @endif
+                </div>
+                <div class="text-center text-sm-end">
+                    @if(auth()->user()->isOwner())
+                    <a href="{{ route('system.control') }}" class="btn btn-sm btn-link text-decoration-none py-0 fw-bold">
+                        Manage <i class="bi bi-arrow-right"></i>
+                    </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card stat-card shadow-sm border-0 border-start border-primary border-4">
@@ -22,7 +50,7 @@
         </div>
     </div>
     
-    @if(auth()->user()->isSuperAdmin())
+@if(auth()->user()->isOwner())
     <div class="col-md-3">
         <div class="card stat-card shadow-sm border-0 border-start border-success border-4">
             <div class="card-body">
@@ -33,6 +61,9 @@
             </div>
         </div>
     </div>
+    @endif
+    
+    @if(auth()->user()->isSuperAdmin() || auth()->user()->isOwner() || auth()->user()->isManager())
     <div class="col-md-3">
         <div class="card stat-card shadow-sm border-0 border-start border-info border-4">
             <div class="card-body">
@@ -51,6 +82,97 @@
     </div>
     @endif
 </div>
+
+@if(auth()->user()->isOwner())
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm bg-light">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1 fw-bold">
+                        <i class="bi bi-shield-check me-2 text-primary"></i> System Master Switch
+                    </h5>
+                    <p class="mb-0 text-secondary">
+                        Current Status: 
+                        @if($isSystemActive)
+                            <span class="badge bg-success">ACTIVE (All users can access)</span>
+                        @else
+                            <span class="badge bg-danger">DEACTIVATED (Only you can access)</span>
+                        @endif
+                    </p>
+                </div>
+                @if($isSystemActive)
+                    <button type="button" class="btn btn-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#deactivateSystemModal">
+                        <i class="bi bi-power me-2"></i> Deactivate System
+                    </button>
+                @else
+                    <button type="button" class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#activateSystemModal">
+                        <i class="bi bi-play-fill me-2"></i> Activate System
+                    </button>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+@if($isSystemActive)
+<!-- Deactivation Modal -->
+<div class="modal fade" id="deactivateSystemModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-danger">Confirm System Deactivation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('system.toggle') }}" method="POST">
+                @csrf
+                <input type="hidden" name="status" value="deactivate">
+                <div class="modal-body">
+                    <p>WARNING: Deactivating the system will lock out all users except you. Are you sure you want to proceed?</p>
+                    <div class="form-group mb-0">
+                        <label for="system_password_deactivate" class="form-label fw-bold">Enter Security Password</label>
+                        <input type="password" name="system_password" id="system_password_deactivate" class="form-control" placeholder="Enter password to confirm" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger px-4">Verify & Deactivate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
+@if(!$isSystemActive)
+<!-- Activation Modal -->
+<div class="modal fade" id="activateSystemModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-success">Confirm System Activation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('system.toggle') }}" method="POST">
+                @csrf
+                <input type="hidden" name="status" value="activate">
+                <div class="modal-body">
+                    <p>You are about to activate the system. All users will be able to access the POS again.</p>
+                    <div class="form-group mb-0">
+                        <label for="system_password_activate" class="form-label fw-bold">Enter Security Password</label>
+                        <input type="password" name="system_password" id="system_password_activate" class="form-control" placeholder="Enter password to confirm" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success px-4">Verify & Activate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+@endif
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

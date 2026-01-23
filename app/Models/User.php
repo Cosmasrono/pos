@@ -11,7 +11,7 @@ use Laravel\Sanctum\HasApiTokens;  // ← ADD THIS LINE
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;  // ← ADD HasApiTokens here
+    use HasApiTokens, HasFactory, Notifiable, \App\Traits\Auditable;
 
     /**
      * The attributes that are mass assignable.
@@ -92,5 +92,10 @@ class User extends Authenticatable
     public function isCashier(): bool
     {
         return $this->hasRole('cashier');
+    }
+
+    public function isOwner(): bool
+    {
+        return $this->hasRole('owner');
     }
 }

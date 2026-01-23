@@ -20,7 +20,8 @@ class ReportController extends Controller
         $start = Carbon::parse($startDate)->startOfDay();
         $end = Carbon::parse($endDate)->endOfDay();
 
-        $sales = Sale::whereBetween('created_at', [$start, $end])
+        $sales = Sale::forCurrentUser()
+            ->whereBetween('created_at', [$start, $end])
             ->with(['cashier', 'items.product'])
             ->get();
 
@@ -37,6 +38,9 @@ class ReportController extends Controller
             ->join('products', 'sale_items.product_id', '=', 'products.id')
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
             ->whereBetween('sales.created_at', [$start, $end])
+            ->when(auth()->user()->isCashier() && !auth()->user()->isSuperAdmin() && !auth()->user()->isManager(), function($q) {
+                return $q->where('sales.cashier_id', auth()->id());
+            })
             ->select('products.name', DB::raw('SUM(sale_items.quantity) as total_quantity'), DB::raw('SUM(sale_items.line_total) as total_revenue'))
             ->groupBy('products.id', 'products.name')
             ->orderByDesc('total_revenue')
@@ -55,7 +59,8 @@ class ReportController extends Controller
         $end = Carbon::parse($endDate)->endOfDay();
 
         // Revenue from sales
-        $revenue = Sale::whereBetween('created_at', [$start, $end])
+        $revenue = Sale::forCurrentUser()
+            ->whereBetween('created_at', [$start, $end])
             ->where('status', 'completed')
             ->sum('total_amount');
 
@@ -65,6 +70,9 @@ class ReportController extends Controller
             ->join('products', 'sale_items.product_id', '=', 'products.id')
             ->whereBetween('sales.created_at', [$start, $end])
             ->where('sales.status', 'completed')
+            ->when(auth()->user()->isCashier() && !auth()->user()->isSuperAdmin() && !auth()->user()->isManager(), function($q) {
+                return $q->where('sales.cashier_id', auth()->id());
+            })
             ->sum(DB::raw('sale_items.quantity * products.cost_price'));
 
         // Expenses - Expenses use expense_date (often just format Y-m-d)

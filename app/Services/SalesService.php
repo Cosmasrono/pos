@@ -20,6 +20,7 @@ class SalesService
             'customer_id' => $data['customer_id'] ?? null,
             'status' => 'completed',
             'subtotal' => $data['subtotal'],
+            'promotion_id' => $data['promotion_id'] ?? null,
             'tax_amount' => $data['tax_amount'] ?? 0,
             'discount_amount' => $data['discount_amount'] ?? 0,
             'total_amount' => $data['total_amount'],

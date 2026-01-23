@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
+    use \App\Traits\Auditable;
+
     // Explicitly set the table name (good practice with SQL Server)
     protected $table = 'products';
 

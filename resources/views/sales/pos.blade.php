@@ -7,31 +7,82 @@
 @section('content')
 <style>
     body {
-        background: url('/images/pos-bg.png') no-repeat center center fixed;
-        background-size: cover;
-        position: relative;
+        background: radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.05) 0%, rgba(248, 250, 252, 1) 90.2%);
+        min-height: 100vh;
     }
     
-    body::before {
-        content: '';
+    .pos-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+
+    .search-input-wrapper {
+        position: relative;
+    }
+
+    .search-input-wrapper i {
         position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(244, 247, 254, 0.4);
-        backdrop-filter: blur(2px);
-        z-index: -1;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
     }
 
-    .card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    #productSearch {
+        padding-left: 45px;
+        height: 50px;
         border-radius: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        background: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
     }
 
-    .card-header {
-        background: rgba(255, 255, 255, 0.05);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    #productSearch:focus {
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        border-color: var(--primary);
+    }
+
+    .product-item {
+        border: none;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        background: white;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+
+    .product-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+        border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    .qty-selector {
+        background: #f1f5f9;
+        border: none;
+        text-align: center;
+        width: 60px;
+    }
+
+    .cart-table th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border: none;
+    }
+
+    .checkout-summary {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
     }
 </style>
 <div class="container-fluid">
@@ -45,7 +96,10 @@
                     <h5 class="mb-0">Search Products</h5>
                 </div>
                 <div class="card-body">
-                    <input type="text" id="productSearch" class="form-control" placeholder="Search by product name, code, or barcode...">
+                    <div class="search-input-wrapper">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="productSearch" class="form-control" placeholder="Search by product name, code, or barcode...">
+                    </div>
                     <div id="searchResults" class="mt-2">
                         <div class="text-center">
                             <div class="spinner-border spinner-border-sm" role="status">
@@ -67,13 +121,13 @@
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead>
+                            <thead class="cart-table">
                                 <tr>
                                     <th>Product</th>
-                                    <th width="100">Qty</th>
-                                    <th width="120">Unit Price</th>
-                                    <th width="120">Total</th>
-                                    <th width="80">Action</th>
+                                    <th width="100" class="text-center">Qty</th>
+                                    <th width="120" class="text-end">Unit Price</th>
+                                    <th width="120" class="text-end">Total</th>
+                                    <th width="80" class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="cartItems">
@@ -100,26 +154,46 @@
                         @csrf
 
                         <!-- Totals Section -->
-                        <div class="mb-4">
+                        <div class="checkout-summary mb-4">
                             <div class="d-flex justify-content-between mb-2">
-                                <span>Subtotal</span>
-                                <strong id="subtotal">KES 0.00</strong>
+                                <span class="text-muted">Subtotal</span>
+                                <strong id="subtotal" class="text-dark">KES 0.00</strong>
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Discount</span>
-                                <input type="number" name="discount" id="discount" class="form-control form-control-sm text-end" value="0" min="0" step="0.01" style="width: 100px;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Discount</span>
+                                <div class="input-group input-group-sm" style="width: 120px;">
+                                    <span class="input-group-text bg-transparent border-0 pe-0">KES</span>
+                                    <input type="number" name="discount" id="discount" class="form-control form-control-sm border-0 bg-transparent text-end fw-bold" value="0" min="0" step="0.01">
+                                </div>
                             </div>
-                            <hr>
-                            <div class="d-flex justify-content-between mb-3">
-                                <h5>Total Amount</h5>
-                                <h5 class="text-primary" id="totalAmount">KES 0.00</h5>
+                            <hr class="opacity-10">
+                            <div class="d-flex justify-content-between align-items-center mb-0">
+                                <h5 class="mb-0 fw-bold">Total</h5>
+                                <h4 class="text-primary mb-0 fw-bold" id="totalAmount">KES 0.00</h4>
                             </div>
+                        </div>
+
+                        <!-- Promotion Selection -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">🎁 PROMOTION</label>
+                            <select name="promotion_id" id="promotion" class="form-select border-0 bg-light rounded-3">
+                                <option value="" data-type="fixed" data-value="0">No Promotion</option>
+                                @foreach($promotions ?? [] as $promotion)
+                                    <option value="{{ $promotion->id }}" 
+                                            data-type="{{ $promotion->type }}" 
+                                            data-value="{{ $promotion->value }}"
+                                            data-min="{{ $promotion->min_spend }}">
+                                        {{ $promotion->name }} 
+                                        ({{ $promotion->type === 'percentage' ? $promotion->value.'%' : 'KES '.$promotion->value }})
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <!-- Customer Selection -->
                         <div class="mb-3">
-                            <label class="form-label">👤 Customer</label>
-                            <select name="customer_id" id="customer" class="form-select">
+                            <label class="form-label small fw-bold text-muted">👤 CUSTOMER</label>
+                            <select name="customer_id" id="customer" class="form-select border-0 bg-light rounded-3">
                                 <option value="">Walk-in Customer</option>
                                 @foreach($customers ?? [] as $customer)
                                     <option value="{{ $customer->id }}">{{ $customer->name }} ({{ $customer->phone }})</option>
@@ -128,14 +202,27 @@
                         </div>
 
                         <!-- Payment Method -->
-                        <div class="mb-3">
-                            <label class="form-label">Payment Method</label>
-                            <select name="payment_method" id="paymentMethod" class="form-select" required>
-                                <option value="cash">💵 Cash</option>
-                                <option value="mpesa">📱 M-Pesa</option>
-                                <option value="card">💳 Card</option>
-                                <option value="credit">📋 Credit</option>
-                            </select>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted">PAYMENT METHOD</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="payment_method" id="pay_cash" value="cash" checked autocomplete="off">
+                                    <label class="btn btn-outline-light text-dark w-100 border bg-white" for="pay_cash">💵 Cash</label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="payment_method" id="pay_mpesa" value="mpesa" autocomplete="off">
+                                    <label class="btn btn-outline-light text-dark w-100 border bg-white" for="pay_mpesa">📱 M-Pesa</label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="payment_method" id="pay_card" value="card" autocomplete="off">
+                                    <label class="btn btn-outline-light text-dark w-100 border bg-white" for="pay_card">💳 Card</label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="payment_method" id="pay_credit" value="credit" autocomplete="off">
+                                    <label class="btn btn-outline-light text-dark w-100 border bg-white" for="pay_credit">📋 Credit</label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="payment_method" id="paymentMethod" value="cash">
                         </div>
 
                         <!-- M-Pesa Phone Number (Hidden by default) -->
@@ -173,10 +260,10 @@
                         @endif
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success btn-lg" id="completeSaleBtn" @if(!($hasActiveShift ?? true)) disabled @endif>
-                                ✓ Complete Sale
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm" id="completeSaleBtn" @if(!($hasActiveShift ?? true)) disabled @endif>
+                                <i class="bi bi-check-circle"></i> Complete Sale
                             </button>
-                            <button type="button" class="btn btn-outline-secondary" id="cancelBtn">Cancel</button>
+                            <button type="button" class="btn btn-link text-muted btn-sm" id="cancelBtn">Reset Cart</button>
                         </div>
                     </form>
                 </div>
@@ -377,25 +464,35 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        let html = '<div class="list-group">';
+        let html = '<div class="list-group list-group-flush rounded-3 overflow-hidden border-0 shadow-sm">';
         products.forEach((product, idx) => {
             html += `
-                <div class="list-group-item product-item-container" data-id="${product.id}">
+                <div class="list-group-item product-item p-3 border-0 mb-1" data-id="${product.id}">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="flex-grow-1">
-                            <strong>${product.name}</strong><br>
-                            <small class="text-muted">Code: ${product.code || 'N/A'} | Stock: ${product.stock || 0}</small>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="product-icon bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-box-seam text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">${product.name}</h6>
+                                <small class="text-muted">Code: ${product.code || 'N/A'} | Stock: ${product.stock || 0}</small>
+                            </div>
                         </div>
-                        <div class="d-flex gap-2 align-items-center">
-                            <strong>KES ${parseFloat(product.price).toFixed(2)}</strong>
-                            <input type="number" class="form-control form-control-sm qty-selector" 
-                                   data-index="${idx}" value="1" min="1" max="${product.stock || 999}" 
-                                   style="width: 60px;" placeholder="Qty">
-                            <button type="button" class="btn btn-sm btn-success add-to-cart-btn" 
-                                    data-id="${product.id}" data-name="${product.name}" 
-                                    data-price="${product.price}">
-                                Add
-                            </button>
+                        <div class="d-flex align-items-center gap-4">
+                            <div class="text-end">
+                                <div class="fw-bold text-primary">KES ${parseFloat(product.price).toLocaleString()}</div>
+                                <small class="text-muted">Unit Price</small>
+                            </div>
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="number" class="form-control form-control-sm qty-selector rounded-pill" 
+                                       data-index="${idx}" value="1" min="1" max="${product.stock || 999}" 
+                                       style="width: 70px;">
+                                <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 add-to-cart-btn" 
+                                        data-id="${product.id}" data-name="${product.name}" 
+                                        data-price="${product.price}">
+                                    <i class="bi bi-plus-lg"></i> Add
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -408,7 +505,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.add-to-cart-btn').forEach((btn, idx) => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
-                const container = this.closest('.product-item-container');
+                const container = this.closest('.product-item');
                 const qtyInput = container.querySelector('.qty-selector');
                 const quantity = parseInt(qtyInput.value) || 1;
                 
@@ -425,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.qty-selector').forEach(input => {
             input.addEventListener('keyup', function(e) {
                 if (e.key === 'Enter') {
-                    const container = this.closest('.product-item-container');
+                    const container = this.closest('.product-item');
                     const btn = container.querySelector('.add-to-cart-btn');
                     btn.click();
                 }
@@ -452,16 +549,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const total = item.price * item.quantity;
             html += `
                 <tr>
-                    <td>${item.name}</td>
-                    <td>
-                        <input type="number" class="form-control form-control-sm qty-input" 
-                               data-id="${item.id}" value="${item.quantity}" min="1">
+                    <td class="align-middle">
+                        <div class="fw-bold text-dark">${item.name}</div>
                     </td>
-                    <td>KES ${item.price.toFixed(2)}</td>
-                    <td>KES ${total.toFixed(2)}</td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-danger remove-item" data-id="${item.id}">
-                            ×
+                    <td class="align-middle">
+                        <input type="number" class="form-control form-control-sm qty-input rounded-pill text-center mx-auto" 
+                               data-id="${item.id}" value="${item.quantity}" min="1" style="width: 70px;">
+                    </td>
+                    <td class="align-middle text-end">KES ${item.price.toFixed(2)}</td>
+                    <td class="align-middle text-end fw-bold">KES ${total.toFixed(2)}</td>
+                    <td class="align-middle text-center">
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-circle remove-item px-2" data-id="${item.id}">
+                            <i class="bi bi-trash"></i>
                         </button>
                     </td>
                 </tr>
@@ -492,8 +591,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update Totals
     function updateTotals() {
         const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const discount = parseFloat(document.getElementById('discount').value) || 0;
-        const total = subtotal - discount;
+        let discount = parseFloat(document.getElementById('discount').value) || 0;
+        
+        // Handle Promotion
+        const promoSelect = document.getElementById('promotion');
+        const selectedOption = promoSelect.options[promoSelect.selectedIndex];
+        const promoType = selectedOption.dataset.type;
+        const promoValue = parseFloat(selectedOption.dataset.value) || 0;
+        const minSpend = parseFloat(selectedOption.dataset.min) || 0;
+        
+        let promoDiscount = 0;
+        if (subtotal >= minSpend) {
+            if (promoType === 'percentage') {
+                promoDiscount = (subtotal * promoValue) / 100;
+            } else {
+                promoDiscount = promoValue;
+            }
+        }
+        
+        const totalDiscount = discount + promoDiscount;
+        const total = Math.max(0, subtotal - totalDiscount);
         
         document.getElementById('subtotal').textContent = `KES ${subtotal.toFixed(2)}`;
         document.getElementById('totalAmount').textContent = `KES ${total.toFixed(2)}`;
@@ -518,6 +635,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event Listeners
     document.getElementById('discount').addEventListener('input', updateTotals);
+    document.getElementById('promotion').addEventListener('change', updateTotals);
     document.getElementById('amountTendered').addEventListener('input', calculateChange);
     
     document.getElementById('clearCart').addEventListener('click', function() {
@@ -535,23 +653,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Payment Method Change
-    document.getElementById('paymentMethod').addEventListener('change', function() {
-        const mpesaField = document.getElementById('mpesaPhoneField');
-        const amountTenderedField = document.getElementById('amountTenderedField');
-        const changeDueField = document.getElementById('changeDueField');
-        
-        if (this.value === 'mpesa') {
-            mpesaField.style.display = 'block';
-            document.getElementById('mpesaPhone').required = true;
-            // Hide amount tendered and change for M-Pesa
-            amountTenderedField.style.display = 'none';
-            changeDueField.style.display = 'none';
-        } else {
-            mpesaField.style.display = 'none';
-            document.getElementById('mpesaPhone').required = false;
-            amountTenderedField.style.display = 'block';
-            changeDueField.style.display = 'block';
-        }
+    document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const mpesaField = document.getElementById('mpesaPhoneField');
+            const amountTenderedField = document.getElementById('amountTenderedField');
+            const changeDueField = document.getElementById('changeDueField');
+            const paymentMethodInput = document.getElementById('paymentMethod');
+            
+            // Sync with hidden input
+            paymentMethodInput.value = this.value;
+            
+            if (this.value === 'mpesa') {
+                mpesaField.style.display = 'block';
+                document.getElementById('mpesaPhone').required = true;
+                amountTenderedField.style.display = 'none';
+                changeDueField.style.display = 'none';
+            } else {
+                mpesaField.style.display = 'none';
+                document.getElementById('mpesaPhone').required = false;
+                amountTenderedField.style.display = 'block';
+                changeDueField.style.display = 'block';
+            }
+        });
     });
 
     // Form Submission

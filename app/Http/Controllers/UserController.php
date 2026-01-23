@@ -15,7 +15,16 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('roles')->latest()->paginate(10);
+        $query = User::with('roles')->latest();
+        
+        // Super Admins should not see Owner users
+        if (auth()->user()->isSuperAdmin() && !auth()->user()->isOwner()) {
+            $query->whereDoesntHave('roles', function($q) {
+                $q->where('name', 'owner');
+            });
+        }
+        
+        $users = $query->paginate(10);
         return view('users.index', compact('users'));
     }
 

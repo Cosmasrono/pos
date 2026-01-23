@@ -59,6 +59,11 @@ class RolePermissionSeeder extends Seeder
         }
 
         // Create roles
+        $owner = Role::firstOrCreate(
+            ['name' => 'owner'],
+            ['display_name' => 'System Owner', 'description' => 'Ultimate system authority and control']
+        );
+
         $superAdmin = Role::firstOrCreate(
             ['name' => 'super_admin'],
             ['display_name' => 'Super Admin', 'description' => 'Full system access']
@@ -84,8 +89,9 @@ class RolePermissionSeeder extends Seeder
             ['display_name' => 'Accountant', 'description' => 'Can view financial reports']
         );
 
-        // Assign all permissions to super admin
+        // Assign all permissions to owner and super admin
         $allPermissions = Permission::all();
+        $owner->permissions()->sync($allPermissions->pluck('id'));
         $superAdmin->permissions()->sync($allPermissions->pluck('id'));
 
         // Assign manager permissions

@@ -19,7 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
      
         $middleware->web(append: [
-            // Add web middleware if needed
+            \App\Http\Middleware\CheckSystemStatus::class,
+            \App\Http\Middleware\CheckSubscription::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

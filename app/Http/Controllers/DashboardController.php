@@ -13,7 +13,8 @@ class DashboardController extends Controller
     public function index(): View
     {
         // Get today's sales
-        $todaySales = Sale::whereDate('created_at', today())
+        $todaySales = Sale::forCurrentUser()
+            ->whereDate('created_at', today())
             ->sum('total_amount');
 
         // Get total products
@@ -30,7 +31,8 @@ class DashboardController extends Controller
             ->first();
 
         // Get recent sales
-        $recentSales = Sale::latest()
+        $recentSales = Sale::forCurrentUser()
+            ->latest()
             ->take(10)
             ->with(['cashier', 'customer'])
             ->get();
@@ -39,7 +41,8 @@ class DashboardController extends Controller
         $startOfMonth = now()->startOfMonth();
         $endOfMonth = now()->endOfMonth();
 
-        $mtdRevenue = Sale::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        $mtdRevenue = Sale::forCurrentUser()
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
             ->where('status', 'completed')
             ->sum('total_amount');
 
@@ -48,6 +51,9 @@ class DashboardController extends Controller
             ->join('products', 'sale_items.product_id', '=', 'products.id')
             ->whereBetween('sales.created_at', [$startOfMonth, $endOfMonth])
             ->where('sales.status', 'completed')
+            ->when(auth()->user()->isCashier() && !auth()->user()->isSuperAdmin() && !auth()->user()->isManager() && !auth()->user()->isOwner(), function($q) {
+                return $q->where('sales.cashier_id', auth()->id());
+            })
             ->sum(\DB::raw('sale_items.quantity * products.cost_price'));
 
         $mtdExpenses = \App\Models\Expense::whereBetween('expense_date', [$startOfMonth, $endOfMonth])
@@ -55,6 +61,10 @@ class DashboardController extends Controller
             ->sum('amount');
 
         $mtdProfit = ($mtdRevenue - $mtdCogs) - $mtdExpenses;
+
+        $isSystemActive = \App\Models\Setting::isSystemActive();
+        $subscriptionStatus = \App\Models\Setting::get('subscription_status', 'active');
+        $subscriptionExpiresAt = \App\Models\Setting::getSubscriptionExpiryDate();
 
         return view('dashboard.index', [
             'todaySales' => $todaySales,
@@ -64,6 +74,9 @@ class DashboardController extends Controller
             'recentSales' => $recentSales,
             'mtdProfit' => $mtdProfit,
             'mtdRevenue' => $mtdRevenue,
+            'isSystemActive' => $isSystemActive,
+            'subscriptionStatus' => $subscriptionStatus,
+            'subscriptionExpiresAt' => $subscriptionExpiresAt,
         ]);
     }
 }

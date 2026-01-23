@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Sale extends Model
 {
+    use \App\Traits\Auditable;
+
     protected $fillable = [
         'receipt_number',
         'cashier_id',
@@ -35,6 +37,7 @@ class Sale extends Model
         'mpesa_paid' => 'decimal:2',
         'card_paid' => 'decimal:2',
         'change_amount' => 'decimal:2',
+        'cashier_id' => 'integer',
     ];
 
     public function cashier(): BelongsTo
@@ -70,5 +73,20 @@ class Sale extends Model
     public function getTotalQuantity(): int
     {
         return $this->items()->sum('quantity');
+    }
+
+    /**
+     * Scope a query to only include sales for the current user if they are a cashier.
+     */
+    public function scopeForCurrentUser($query)
+    {
+        $user = auth()->user();
+        if ($user && $user->isOwner()) {
+            return $query;
+        }
+        if ($user && $user->isCashier() && !$user->isSuperAdmin() && !$user->isManager()) {
+            return $query->where('cashier_id', $user->id);
+        }
+        return $query;
     }
 }
