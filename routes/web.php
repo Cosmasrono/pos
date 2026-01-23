@@ -52,6 +52,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('expense-categories', ExpenseCategoryController::class);
     Route::resource('expenses', ExpenseController::class);
+    Route::patch('expenses/{expense}/approve', [ExpenseController::class, 'approve'])->name('expenses.approve');
+    Route::patch('expenses/{expense}/reject', [ExpenseController::class, 'reject'])->name('expenses.reject');
 
     // Promotions
     Route::resource('promotions', PromotionController::class);
