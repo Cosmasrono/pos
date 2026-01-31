@@ -310,4 +310,33 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </div>
+
+<!-- Close Shift Modal -->
+<div class="modal fade" id="closeShiftModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Close Shift</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('shifts.close') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="closing_cash" class="form-label">Closing Cash (KES)</label>
+                        <input type="number" step="0.01" id="closing_cash" name="closing_cash" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="closing_notes" class="form-label">Notes</label>
+                        <textarea id="closing_notes" name="closing_notes" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Close Shift</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection

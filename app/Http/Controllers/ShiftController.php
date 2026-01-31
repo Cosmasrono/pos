@@ -59,13 +59,13 @@ class ShiftController extends Controller
 
         // Calculate shift totals from sales
         $cashSales = $shift->sales()
-            ->where('payment_method', 'cash')
+            ->where('primary_payment_method', 'cash')
             ->sum('total_amount');
         $mpesaSales = $shift->sales()
-            ->where('payment_method', 'mpesa')
+            ->where('primary_payment_method', 'mpesa')
             ->sum('total_amount');
         $cardSales = $shift->sales()
-            ->where('payment_method', 'card')
+            ->where('primary_payment_method', 'card')
             ->sum('total_amount');
 
         $expectedClosing = $shift->opening_cash + $cashSales;
